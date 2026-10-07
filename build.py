@@ -65,5 +65,12 @@ combined = [item for pair in zip(combined[:30], combined[30:]) for item in pair]
 DIST.mkdir(exist_ok=True)
 for name, data in (("questions.json", questions), ("glossary.json", glossary), ("combined.json", combined)):
     (DIST / name).write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+(DIST / "data.js").write_text(
+    "window.STUDY_DATA=" + json.dumps(
+        {"questions": questions, "glossary": glossary, "combined": combined},
+        ensure_ascii=False, separators=(",", ":"),
+    ) + ";\n",
+    encoding="utf-8",
+)
 
 print(f"Questions: {dict(counts)}; combined: {len(combined)}; glossary: {len(glossary)}")

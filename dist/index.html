@@ -8,6 +8,7 @@
   <title>Architectural Practice Study</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='white'/%3E%3Cpath d='M10 52 32 8l22 44M20 34h24' fill='none' stroke='black' stroke-width='5'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
+  <script src="data.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -31,7 +32,7 @@
           <p class="eyebrow">00 / STUDY GUIDE</p><h1>Understand the<br>practice<span class="dot">.</span></h1>
           <p class="lead">A focused review of the architect, professional life, and architectural services. Study the terms, then test what you know.</p>
           <div class="module-grid" id="module-grid"></div>
-          <div class="note"><strong>How to use this guide</strong><p>Choose a quiz, select an answer, and check it. Each explanation points to the page of the supplied module. Your checked answers are saved in this browser.</p></div>
+          <div class="note"><strong>How to use this guide</strong><p>Choose a quiz, select an answer, and check it. Each explanation points to the page of the supplied module. Your checked answers are saved in this browser.</p><p>Legal and fee questions follow the course PDFs. For professional decisions, verify the current <a href="https://www.prc.gov.ph/sites/default/files/Architecture%20Republic%20Act%20No.%209266.pdf" target="_blank" rel="noopener noreferrer">Architecture Act of 2004</a> and applicable regulations.</p></div>
         </section>
         <section id="glossary" class="view" hidden>
           <p class="eyebrow">01 / REFERENCE</p><h1>Glossary<span class="dot">.</span></h1>
@@ -41,7 +42,7 @@
         </section>
         <section id="quiz" class="view" hidden>
           <p id="quiz-eyebrow" class="eyebrow"></p><h1 id="quiz-title"></h1><p id="quiz-intro" class="lead"></p>
-          <div class="quiz-toolbar"><label for="topic">TOPIC</label><select id="topic"></select><span id="score" aria-live="polite"></span></div>
+          <div class="quiz-toolbar"><label for="topic">TOPIC</label><select id="topic"></select><span id="score" aria-live="polite"></span><button type="button" id="restart" title="Clear answers for this quiz">Restart</button></div>
           <div class="quiz-box"><div class="quiz-meta"><span id="position"></span><span id="question-topic"></span></div><div class="progress"><div id="progress-fill"></div></div><div id="question-card"></div><div class="quiz-actions"><button type="button" id="prev">Previous</button><button type="button" id="next">Next question</button></div></div>
         </section>
       </main>
