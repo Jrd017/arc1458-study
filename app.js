@@ -11,6 +11,7 @@ function listForPage() {
   return state.topic === 'all' ? base : base.filter(q => q.topic === state.topic);
 }
 function pageKey() { return `${state.page}:${state.topic}`; }
+function responseKey(question) { return state.page === 'combined' ? `combined:${question.id}` : question.id; }
 function renderHome() {
   const counts = [1,2,3].map(m => state.questions.filter(q => q.module === m).length);
   const cards = [
@@ -38,8 +39,8 @@ function updateTopics() {
 }
 function updateScore() {
   const base = state.page === 'combined' ? state.combined : state.questions.filter(q=>q.module===Number(state.page.slice(-1)));
-  const answered = base.filter(q=>Number.isInteger(state.responses[q.id]));
-  const correct = answered.filter(q=>state.responses[q.id]===q.answer).length;
+  const answered = base.filter(q=>Number.isInteger(state.responses[responseKey(q)]));
+  const correct = answered.filter(q=>state.responses[responseKey(q)]===q.answer).length;
   $('#score').textContent = `${answered.length} answered · ${correct} correct`;
 }
 function renderQuiz() {
@@ -49,7 +50,7 @@ function renderQuiz() {
   const index = Math.max(0,Math.min(state.positions[key] || 0,set.length-1));
   state.positions[key]=index;
   const q=set[index];
-  const recorded=state.responses[q.id];
+  const recorded=state.responses[responseKey(q)];
   const checked=Number.isInteger(recorded);
   const selected=checked ? recorded : state.selected;
   $('#position').textContent=`QUESTION ${index+1} / ${set.length}`;
@@ -64,7 +65,7 @@ function renderQuiz() {
   }).join('');
   $('#question-card').innerHTML=`<div class="question-inner"><h2>${escapeHtml(q.question)}</h2><div class="answers" role="group" aria-label="Answer choices">${options}</div>${checked?`<div class="explanation" role="status"><strong>${recorded===q.answer?'CORRECT':`CORRECT ANSWER: ${'ABCD'[q.answer]}`}</strong><p>${escapeHtml(q.explanation)}</p><span class="source">SOURCE: MODULE ${q.module} · PDF PAGE ${q.page} · ${escapeHtml(files[q.module])}</span></div>`:`<button type="button" class="check" id="check" ${state.selected===null?'disabled':''}>Check answer</button>`}</div>`;
   $('#question-card').querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>{state.selected=Number(button.dataset.choice);renderQuiz();}));
-  $('#check')?.addEventListener('click',()=>{state.responses[q.id]=state.selected;state.selected=null;save();updateScore();renderQuiz();});
+  $('#check')?.addEventListener('click',()=>{state.responses[responseKey(q)]=state.selected;state.selected=null;save();updateScore();renderQuiz();});
   $('#prev').disabled=index===0;
   $('#next').disabled=index===set.length-1;
   updateScore();
@@ -95,14 +96,20 @@ async function init(){
   $('#search').addEventListener('input',renderGlossary);
   $('#glossary-module').addEventListener('change',renderGlossary);
   $('#topic').addEventListener('change',e=>{state.topic=e.target.value;state.selected=null;renderQuiz();});
+  $('#restart').addEventListener('click',()=>{
+    const base=state.page==='combined'?state.combined:state.questions.filter(q=>q.module===Number(state.page.slice(-1)));
+    base.forEach(q=>delete state.responses[responseKey(q)]);
+    Object.keys(state.positions).filter(k=>k.startsWith(`${state.page}:`)).forEach(k=>delete state.positions[k]);
+    state.selected=null;save();renderQuiz();
+  });
   $('#prev').addEventListener('click',()=>{state.positions[pageKey()]--;state.selected=null;renderQuiz();$('#quiz').scrollIntoView({behavior:'smooth'});});
   $('#next').addEventListener('click',()=>{state.positions[pageKey()]++;state.selected=null;renderQuiz();$('#quiz').scrollIntoView({behavior:'smooth'});});
   window.addEventListener('hashchange',route);
   try {
-    const urls=['questions.json','glossary.json','combined.json'];
-    const responses=await Promise.all(urls.map(u=>fetch(u)));
-    if(responses.some(r=>!r.ok))throw new Error('Study data unavailable');
-    [state.questions,state.terms,state.combined]=await Promise.all(responses.map(r=>r.json()));
+    if(!window.STUDY_DATA)throw new Error('Study data unavailable');
+    state.questions=window.STUDY_DATA.questions;
+    state.terms=window.STUDY_DATA.glossary;
+    state.combined=window.STUDY_DATA.combined;
     renderHome();renderGlossary();route();
   } catch(error) {
     $('#module-grid').innerHTML='<p class="empty">Study data could not load. Please refresh the page.</p>';
